@@ -16,7 +16,18 @@
 #include "murmur3_hash.h"
 
 namespace memcache {
+/*!
+ * \brief LRU cache. Lookups using std::unordered_map and LRU using
+ * std::list.
+ *
+ * All external operations a locked using a std::mutex.
+ * We reclaim entries when we run out of pre-set memory capacity.
+ */
   struct cache {
+
+    /*!
+     * \brief Cache key.
+     */
 		struct key {
       explicit key(const char* d, size_t len,
                    size_t memsize = 0) :
@@ -39,6 +50,10 @@ namespace memcache {
 			}
 		};
 
+    /*!
+     * \brief Cache value.
+     * Stores the entire write packet and also the LRU reference.
+     */
 		struct value {
       explicit value(std::string&& d, const protocol_binary_request_header& h)
           :data_str_(std::move(d)), header_(h) {
@@ -109,6 +124,10 @@ namespace memcache {
 
 		~cache() {}
 
+    /*!
+     * \brief Reset capacity. Used for testing.
+     * @param capacity
+     */
     void rehash(size_t capacity) {
       clear();
 
@@ -135,7 +154,7 @@ namespace memcache {
 
     void clear() {
       if (size_)
-        free_mem(size_);
+        reclaim(size_);
     }
 	
 	private:
@@ -154,7 +173,11 @@ namespace memcache {
 		cache(const cache&) = delete;
 		cache& operator=(cache&) = delete;
 
-    void free_mem(size_t size);
+    /*!
+     * \brief Reclaim size worth of entires using LRU.
+     * @param size
+     */
+    void reclaim(size_t size);
 
     std::shared_ptr<value> get_inl(const key& k) {
       auto it = lookup_.find(k);
@@ -183,9 +206,9 @@ namespace memcache {
       size_t mem = v.data_str_.length();
 
       if (mem + size_ > capacity_) {
-        // Free 10x the new item size:
+        // Free 5x the new item size.
         // XXX TODO Make this a pluggable policy.
-        free_mem(5 * mem);
+        reclaim(5 * mem);
       }
 
       auto it2 = lru_.insert(lru_.end(), k);

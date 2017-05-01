@@ -200,7 +200,7 @@ int main(int argc, char* argv[]) {
   }
 
   std::clog << "Listening on: " << o.ip << ":" << o.port
-            << " threads:" << o.threads << " memory limit:" << o.cachemem
+            << " threads:" << o.threads << " memory limit:" << o.cachemem / memcache::MB
             << "MB" << " max connections:" << o.max_connections << std::endl;
 
   //allocate cache

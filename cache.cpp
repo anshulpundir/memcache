@@ -29,7 +29,7 @@ bool cache::cas(value v, uint64_t cas) {
   return true;
 }
 
-void cache::free_mem(size_t size) {
+void cache::reclaim(size_t size) {
   assert(size);
 
   size_t freed = 0;
