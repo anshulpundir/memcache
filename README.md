@@ -13,7 +13,7 @@ cd ./memcache && mkdir -p build && cd build && cmake .. && make -j
 ## testing
 ### unit-tests
 ```sh
-./memcache && mkdir -p build && cd build && cmake .. && make -j && make test
+cd ./memcache && mkdir -p build && cd build && cmake .. && make -j && make test
 ```
 
 ### e2e tests
@@ -75,7 +75,7 @@ Currently there is a single global cache object, access to which is locked using
 * Memory limit does not include the usage for the STL stuff.
 
 ## productionisation
-Apart from building an optimized binary, we would need to add support for efficient logging (with line-numbers and file names). We would also need to collect stats for the different operations (both for individual components and e2e).
+Apart from building an optimized binary, we would need to add support for efficient logging. We would also need to collect stats for the different operations (both for individual components and e2e).
 
 ## TODO
 * Zero-copy.
